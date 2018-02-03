@@ -8,3 +8,4 @@ Possible additions:
 - colouring of the tiles based on height (height map, heat map)
 - automatic noise generation considering height difference between neighbouring tiles (if wished by user)
 - path finding in a noise map and optimizing the map regarding the found path
+- "ingame" editor with export function
