@@ -4,17 +4,18 @@ using UnityEngine;
 
 public class BoardLogic : MonoBehaviour
 {
-
     public enum TileType
     {
         SQUARE,
-        HEXAGONAL
+        HEXAGONAL,
+        TRIANGLE
     }
 
+    public TileType type = TileType.SQUARE;
     public int BoardWidth = 8;
     public int BoardLength = 8;
     public int TileSideLength = 1;
-    public TileType type = TileType.SQUARE;
+    public int TileMaxheight = 8;
     public GameObject tile;
 
     private GameObject[,] tiles;
@@ -22,15 +23,9 @@ public class BoardLogic : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        tiles = new GameObject[BoardLength, BoardWidth];
+        int[,] heightMap = generateRandomHeightMap();
 
-        for (int y = 0; y < BoardLength; y++)
-        {
-            for (int x = 0; x < BoardWidth; x++)
-            {
-                tiles[y, x] = Instantiate(tile, new Vector3(TileSideLength * x, ((x+y) % 2) * 0.1f, TileSideLength * y), Quaternion.identity, this.transform);
-            }
-        }
+        instantiateBoard(heightMap);
     }
 
     // Update is called once per frame
@@ -38,4 +33,72 @@ public class BoardLogic : MonoBehaviour
     {
 
     }
+
+    #region HEIGHT MAP
+
+    /// <summary>
+    /// Returns a randomly generated height map for the tiles.
+    /// </summary>
+    /// <returns>Height values for each tile</returns>
+    private int[,] generateRandomHeightMap()
+    {
+        int[,] heightMap = new int[BoardLength, BoardWidth];
+
+        for (int z = 0; z < BoardLength; z++)
+        {
+            for (int x = 0; x < BoardWidth; x++)
+            {
+                heightMap[z, x] = (int)(Random.value * TileMaxheight);
+            }
+        }
+
+        return heightMap;
+    }
+
+    /// <summary>
+    /// Returns a height map specified in a file.
+    /// </summary>
+    /// <param name="path">Path to height map file</param>
+    /// <returns>Height map as described by file</returns>
+    private int[,] getHeightMapFromFile(string path)
+    {
+        int[,] heightMap = new int[BoardLength, BoardWidth];
+
+        // TODO: get file from given path
+
+        return heightMap;
+    }
+
+    #endregion
+
+    #region INSTANTIATION
+
+    private GameObject[,] instantiateBoard(int[,] heightMap)
+    {
+        // initialize tiles
+        tiles = new GameObject[BoardLength, BoardWidth];
+
+        for (int z = 0; z < BoardLength; z++)
+        {
+            for (int x = 0; x < BoardWidth; x++)
+            {
+                switch (type)
+                {
+                    case TileType.SQUARE:
+                        tiles[z, x] = Instantiate(tile, new Vector3(TileSideLength * x, heightMap[z, x] * 0.2f, TileSideLength * z), Quaternion.identity, this.transform);
+                        break;
+                    case TileType.HEXAGONAL:
+                        //TODO
+                        break;
+                    case TileType.TRIANGLE:
+                        //TODO
+                        break;
+                }
+            }
+        }
+
+        return tiles;
+    }
+
+    #endregion
 }
