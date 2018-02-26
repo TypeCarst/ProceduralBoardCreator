@@ -25,7 +25,7 @@ public class BoardLogic : MonoBehaviour
     {
         int[,] heightMap = generateRandomHeightMap();
 
-        instantiateBoard(heightMap);
+        InstantiateBoard(heightMap);
     }
 
     // Update is called once per frame
@@ -73,7 +73,7 @@ public class BoardLogic : MonoBehaviour
 
     #region INSTANTIATION
 
-    private GameObject[,] instantiateBoard(int[,] heightMap)
+    private GameObject[,] InstantiateBoard(int[,] heightMap)
     {
         // initialize tiles
         tiles = new GameObject[BoardLength, BoardWidth];
@@ -85,7 +85,8 @@ public class BoardLogic : MonoBehaviour
                 switch (type)
                 {
                     case TileType.SQUARE:
-                        tiles[z, x] = Instantiate(tile, new Vector3(TileSideLength * x, heightMap[z, x] * 0.2f, TileSideLength * z), Quaternion.identity, this.transform);
+                        tiles[z, x] = Instantiate(tile, new Vector3(TileSideLength * x, 0, TileSideLength * z), Quaternion.identity, this.transform);
+                        tiles[z, x].GetComponent<TileBehaviour>().ScaleY(0.2f + heightMap[z, x] * 0.2f);
                         break;
                     case TileType.HEXAGONAL:
                         //TODO

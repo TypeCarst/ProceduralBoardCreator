@@ -5,10 +5,10 @@ using UnityEngine;
 public class TileBehaviour : MonoBehaviour {
 
     private GameObject tile;
-    private int scaleY = 1;
+    private float scaleY = 1.0f;
 
 	// Use this for initialization
-	void Start () {
+	void Awake () {
         tile = transform.GetChild(0).gameObject;
 	}
 	
@@ -17,8 +17,9 @@ public class TileBehaviour : MonoBehaviour {
 		
 	}
 
-    public void ScaleY(int newScale)
+    public void ScaleY(float newScale)
     {
-
+        scaleY = newScale;
+        tile.transform.localScale = new Vector3(tile.transform.localScale.x, scaleY, tile.transform.localScale.z);
     }
 }
