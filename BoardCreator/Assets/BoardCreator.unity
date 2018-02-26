@@ -141,11 +141,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
-  BoardWidth: 15
-  BoardLength: 15
+  BoardWidth: 25
+  BoardLength: 25
   TileSideLength: 1
-  TileMaxheight: 4
+  TileMaxheight: 8
+  useBorder: 1
   tile: {fileID: 1004586079308408, guid: f5027a95802e4494b8cddcd9c6a6407c, type: 2}
+  borderTile: {fileID: 1866266809070880, guid: 928646b81b25b1545a005d12f39b7ef3, type: 2}
 --- !u!4 &445354021
 Transform:
   m_ObjectHideFlags: 0

@@ -16,23 +16,50 @@ public class BoardLogic : MonoBehaviour
     public int BoardLength = 8;
     public int TileSideLength = 1;
     public int TileMaxheight = 8;
+    public bool useBorder = true;
     public GameObject tile;
+    public GameObject borderTile;
 
     private GameObject[,] tiles;
 
     // Use this for initialization
     void Start()
     {
-        int[,] heightMap = generateRandomHeightMap();
-
-        InstantiateBoard(heightMap);
+        SetUpGameBoard();
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            DestroyBoard();
+            SetUpGameBoard();
+        }
     }
+
+    public void SetUpGameBoard()
+    {
+        int[,] heightMap = generateRandomHeightMap();
+
+        InstantiateBoard(heightMap);
+    }
+
+    public void DestroyBoard()
+    {
+        int w = tiles.GetLength(1);
+        int l = tiles.GetLength(0);
+
+        for (int z = 0; z < l; z++)
+        {
+            for (int x = 0; x < w; x++)
+            {
+                Destroy(tiles[z, x]);
+            }
+        }
+    }
+
+    #region INSTANTIATION
 
     #region HEIGHT MAP
 
@@ -71,22 +98,38 @@ public class BoardLogic : MonoBehaviour
 
     #endregion
 
-    #region INSTANTIATION
-
     private GameObject[,] InstantiateBoard(int[,] heightMap)
     {
-        // initialize tiles
-        tiles = new GameObject[BoardLength, BoardWidth];
+        int length = BoardLength;
+        int width = BoardWidth;
+        int heightMapOffset = 0;
 
-        for (int z = 0; z < BoardLength; z++)
+        if (useBorder)
         {
-            for (int x = 0; x < BoardWidth; x++)
+            length += 2;
+            width += 2;
+            heightMapOffset = 1;
+        }
+
+        // initialize tiles
+        tiles = new GameObject[length, width];
+
+        for (int z = 0; z < length; z++)
+        {
+            for (int x = 0; x < width; x++)
             {
                 switch (type)
                 {
                     case TileType.SQUARE:
-                        tiles[z, x] = Instantiate(tile, new Vector3(TileSideLength * x, 0, TileSideLength * z), Quaternion.identity, this.transform);
-                        tiles[z, x].GetComponent<TileBehaviour>().ScaleY(0.2f + heightMap[z, x] * 0.2f);
+                        if (useBorder && (z == 0 || z == length - 1 || x == 0 || x == width - 1))
+                        {
+                            tiles[z, x] = Instantiate(borderTile, new Vector3(TileSideLength * x, 0, TileSideLength * z), Quaternion.identity, this.transform);
+                        }
+                        else
+                        {
+                            tiles[z, x] = Instantiate(tile, new Vector3(TileSideLength * x, 0, TileSideLength * z), Quaternion.identity, this.transform);
+                            tiles[z, x].GetComponent<TileBehaviour>().ScaleY(0.2f + heightMap[z - heightMapOffset, x - heightMapOffset]);
+                        }
                         break;
                     case TileType.HEXAGONAL:
                         //TODO
@@ -97,6 +140,8 @@ public class BoardLogic : MonoBehaviour
                 }
             }
         }
+
+
 
         return tiles;
     }
