@@ -141,6 +141,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
+  arrangement: 0
   BoardWidth: 25
   BoardLength: 25
   TileSideLength: 1
