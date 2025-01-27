@@ -1,18 +1,15 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2017
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoardCreator", "BoardCreator.csproj", "{9E5D9FCA-085E-17E9-20C6-E383E115EA91}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{10c88bbb-25bd-4af7-6e0d-7230f63a1a6e}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9E5D9FCA-085E-17E9-20C6-E383E115EA91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9E5D9FCA-085E-17E9-20C6-E383E115EA91}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9E5D9FCA-085E-17E9-20C6-E383E115EA91}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9E5D9FCA-085E-17E9-20C6-E383E115EA91}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10c88bbb-25bd-4af7-6e0d-7230f63a1a6e}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10c88bbb-25bd-4af7-6e0d-7230f63a1a6e}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

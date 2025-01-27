@@ -1,39 +1,60 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.Serialization;
 
 public class BoardLogic : MonoBehaviour
 {
-    public enum TileType
+    private enum TileType
     {
-        SQUARE,
-        HEXAGONAL,
-        TRIANGLE
+        Square,
+        Hexagonal,
+        Triangle
     }
 
-    public enum HeightArrangement
+    private enum HeightArrangement
     {
-        FLAT,
-        RANDOM,
-        SIMPLEXNOISE,
-        VALLEY,
-        MAZE,
-        RANDOMPATH
+        Flat,
+        Random,
+        SimplexNoise,
+        Valley,
+        Maze,
+        RandomPath
     }
 
-    public TileType type = TileType.SQUARE;
-    public HeightArrangement arrangement = HeightArrangement.RANDOM;
-    public int BoardWidth = 8;
-    public int BoardLength = 8;
-    public const int MaxBoardWidth = 25;
-    public const int MaxBoardLength = 25;
-    public int TileSideLength = 1;
-    public int TileMaxheight = 8;
-    public bool useBorder = true;
-    public GameObject tile;
-    public GameObject borderTile;
+    private const int MAX_BOARD_WIDTH = 25;
+    private const int MAX_BOARD_LENGTH = 25;
 
-    private GameObject[,] tiles;
+    #region Serialized fields
+
+    [SerializeField]
+    private TileType _type = TileType.Square;
+    
+    [SerializeField]
+    private HeightArrangement _arrangement = HeightArrangement.Random;
+
+    [SerializeField]
+    private int _boardWidth = 8;
+    
+    [SerializeField]
+    private int _boardLength = 8;
+
+    [SerializeField]
+    private int _tileSideLength = 1;
+    
+    [SerializeField]
+    private int _tileMaxHeight = 8;
+    
+    [SerializeField]
+    private bool _useBorder = true;
+    
+    [SerializeField]
+    private GameObject _tile;
+
+    [SerializeField]
+    private GameObject _borderTile;
+
+    #endregion Serialized fields
+
+    private GameObject[,] _tiles;
 
     // Use this for initialization
     void Start()
@@ -54,10 +75,10 @@ public class BoardLogic : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.KeypadPlus))
         {
-            if (BoardWidth < MaxBoardWidth && BoardLength < MaxBoardLength)
+            if (_boardWidth < MAX_BOARD_WIDTH && _boardLength < MAX_BOARD_LENGTH)
             {
-                BoardWidth++;
-                BoardLength++;
+                _boardWidth++;
+                _boardLength++;
 
                 // TODO: keep current layout and add a row and a column
 
@@ -68,10 +89,10 @@ public class BoardLogic : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.KeypadMinus))
         {
-            if (BoardWidth > 1 && BoardLength > 1)
+            if (_boardWidth > 1 && _boardLength > 1)
             {
-                BoardWidth--;
-                BoardLength--;
+                _boardWidth--;
+                _boardLength--;
 
                 // TODO: keep current layout and remove a row and a column
 
@@ -90,21 +111,22 @@ public class BoardLogic : MonoBehaviour
 
     public void SetUpGameBoard()
     {
-        int[,] heightMap = getHeightArrangement();
+        int[,] heightMap = GetHeightArrangement();
 
         InstantiateBoard(heightMap);
     }
 
     public void DestroyBoard()
     {
-        int w = tiles.GetLength(1);
-        int l = tiles.GetLength(0);
+        // TODO: pooling
+        int w = _tiles.GetLength(1);
+        int l = _tiles.GetLength(0);
 
         for (int z = 0; z < l; z++)
         {
             for (int x = 0; x < w; x++)
             {
-                Destroy(tiles[z, x]);
+                Destroy(_tiles[z, x]);
             }
         }
     }
@@ -116,46 +138,46 @@ public class BoardLogic : MonoBehaviour
     private void SetNextHeightArrangement()
     {
         int enumLength = System.Enum.GetNames(typeof(HeightArrangement)).Length;
-        arrangement = (HeightArrangement)(((int)arrangement + 1) % enumLength);
+        _arrangement = (HeightArrangement)(((int)_arrangement + 1) % enumLength);
     }
 
-    private int[,] getHeightArrangement()
+    private int[,] GetHeightArrangement()
     {
-        switch (arrangement)
+        switch (_arrangement)
         {
-            case HeightArrangement.FLAT:
-                return generateFlatHeightMap();
-            case HeightArrangement.RANDOM:
-                return generateRandomHeightMap();
-            case HeightArrangement.MAZE:
+            case HeightArrangement.Flat:
+                return GenerateFlatHeightMap();
+            case HeightArrangement.Random:
+                return GenerateRandomHeightMap();
+            case HeightArrangement.Maze:
                 //TODO
                 break;
-            case HeightArrangement.RANDOMPATH:
+            case HeightArrangement.RandomPath:
                 //TODO
                 break;
-            case HeightArrangement.SIMPLEXNOISE:
+            case HeightArrangement.SimplexNoise:
                 //TODO
                 break;
-            case HeightArrangement.VALLEY:
+            case HeightArrangement.Valley:
                 //TODO
                 break;
         }
 
         // TODO: remove mockup
-        return generateFlatHeightMap();
+        return GenerateFlatHeightMap();
     }
 
     /// <summary>
     /// Returns a randomly generated height map for the tiles.
     /// </summary>
     /// <returns>Height values for each tile</returns>
-    private int[,] generateFlatHeightMap()
+    private int[,] GenerateFlatHeightMap()
     {
-        int[,] heightMap = new int[BoardLength, BoardWidth];
+        int[,] heightMap = new int[_boardLength, _boardWidth];
 
-        for (int z = 0; z < BoardLength; z++)
+        for (int z = 0; z < _boardLength; z++)
         {
-            for (int x = 0; x < BoardWidth; x++)
+            for (int x = 0; x < _boardWidth; x++)
             {
                 heightMap[z, x] = 1;
             }
@@ -168,15 +190,15 @@ public class BoardLogic : MonoBehaviour
     /// Returns a randomly generated height map for the tiles.
     /// </summary>
     /// <returns>Height values for each tile</returns>
-    private int[,] generateRandomHeightMap()
+    private int[,] GenerateRandomHeightMap()
     {
-        int[,] heightMap = new int[BoardLength, BoardWidth];
+        int[,] heightMap = new int[_boardLength, _boardWidth];
 
-        for (int z = 0; z < BoardLength; z++)
+        for (int z = 0; z < _boardLength; z++)
         {
-            for (int x = 0; x < BoardWidth; x++)
+            for (int x = 0; x < _boardWidth; x++)
             {
-                heightMap[z, x] = (int)(Random.value * TileMaxheight);
+                heightMap[z, x] = (int)(Random.value * _tileMaxHeight);
             }
         }
 
@@ -188,9 +210,9 @@ public class BoardLogic : MonoBehaviour
     /// </summary>
     /// <param name="path">Path to height map file</param>
     /// <returns>Height map as described by file</returns>
-    private int[,] getHeightMapFromFile(string path)
+    private int[,] GetHeightMapFromFile(string path)
     {
-        int[,] heightMap = new int[BoardLength, BoardWidth];
+        int[,] heightMap = new int[_boardLength, _boardWidth];
 
         // TODO: get file from given path
 
@@ -201,11 +223,11 @@ public class BoardLogic : MonoBehaviour
 
     private GameObject[,] InstantiateBoard(int[,] heightMap)
     {
-        int length = BoardLength;
-        int width = BoardWidth;
+        int length = _boardLength;
+        int width = _boardWidth;
         int heightMapOffset = 0;
 
-        if (useBorder)
+        if (_useBorder)
         {
             length += 2;
             width += 2;
@@ -213,36 +235,42 @@ public class BoardLogic : MonoBehaviour
         }
 
         // initialize tiles
-        tiles = new GameObject[length, width];
+        _tiles = new GameObject[length, width];
 
         for (int z = 0; z < length; z++)
         {
             for (int x = 0; x < width; x++)
             {
-                switch (type)
+                switch (_type)
                 {
-                    case TileType.SQUARE:
-                        if (useBorder && (z == 0 || z == length - 1 || x == 0 || x == width - 1))
+                    case TileType.Square:
+                        if (_useBorder && (z == 0 || z == length - 1 || x == 0 || x == width - 1))
                         {
-                            tiles[z, x] = Instantiate(borderTile, new Vector3(TileSideLength * x, 0, TileSideLength * z), Quaternion.identity, this.transform);
+                            // TODO: pooling!
+                            _tiles[z, x] = Instantiate(_borderTile,
+                                new Vector3(_tileSideLength * x, 0, _tileSideLength * z), Quaternion.identity,
+                                this.transform);
                         }
                         else
                         {
-                            tiles[z, x] = Instantiate(tile, new Vector3(TileSideLength * x, 0, TileSideLength * z), Quaternion.identity, this.transform);
-                            tiles[z, x].GetComponent<TileBehaviour>().ScaleY(0.2f + heightMap[z - heightMapOffset, x - heightMapOffset]);
+                            _tiles[z, x] = Instantiate(_tile, new Vector3(_tileSideLength * x, 0, _tileSideLength * z),
+                                Quaternion.identity, this.transform);
+                            _tiles[z, x].GetComponent<TileBehaviour>()
+                                .SetHeight(0.2f + heightMap[z - heightMapOffset, x - heightMapOffset]);
                         }
+
                         break;
-                    case TileType.HEXAGONAL:
+                    case TileType.Hexagonal:
                         //TODO
                         break;
-                    case TileType.TRIANGLE:
+                    case TileType.Triangle:
                         //TODO
                         break;
                 }
             }
         }
 
-        return tiles;
+        return _tiles;
     }
 
     public GameObject[,] AddSquareBorderTiles(GameObject[,] tiles)

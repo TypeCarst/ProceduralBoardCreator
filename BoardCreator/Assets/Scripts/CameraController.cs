@@ -61,12 +61,12 @@ public class CameraController : MonoBehaviour
         }
 
 
-        if (Input.GetKey(KeyCode.Q)) { transform.position += transform.up * climbSpeed * Time.deltaTime; }
-        if (Input.GetKey(KeyCode.E)) { transform.position -= transform.up * climbSpeed * Time.deltaTime; }
+        if (Input.GetKey(KeyCode.E)) { transform.position += transform.up * climbSpeed * Time.deltaTime; }
+        if (Input.GetKey(KeyCode.Q)) { transform.position -= transform.up * climbSpeed * Time.deltaTime; }
 
         if (Input.GetKeyDown(KeyCode.End))
         {
-            Screen.lockCursor = (Screen.lockCursor == false) ? true : false;
+            Screen.lockCursor = Screen.lockCursor == false;
         }
     }
 }

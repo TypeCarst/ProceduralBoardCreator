@@ -6,9 +6,9 @@ public class TileBehaviour : MonoBehaviour
 {
     private float scaleY = 1.0f;
 
-    public void ScaleY(float newScale)
+    public void SetHeight(float newHeight)
     {
-        scaleY = newScale;
+        scaleY = newHeight;
         transform.localScale = new Vector3(transform.localScale.x, scaleY, transform.localScale.z);
     }
 }
