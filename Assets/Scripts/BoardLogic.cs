@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 public class BoardLogic : MonoBehaviour
@@ -21,8 +22,8 @@ public class BoardLogic : MonoBehaviour
         RandomPath
     }
 
-    private const int MAX_BOARD_WIDTH = 25;
-    private const int MAX_BOARD_LENGTH = 25;
+    private const int MAX_BOARD_WIDTH = 20;
+    private const int MAX_BOARD_LENGTH = 20;
 
     #region Serialized fields
 
@@ -42,8 +43,11 @@ public class BoardLogic : MonoBehaviour
     private int _boardLength;
 
     [SerializeField]
-    private int _tileMaxHeight;
+    private float _boardMaxHeight;
 
+    [SerializeField]
+    private float _unitTileHeight;
+    
     [SerializeField]
     private bool _useBorder = true;
 
@@ -129,6 +133,24 @@ public class BoardLogic : MonoBehaviour
         if (_generationSeed.Contains("hello"))
         {
             Debug.LogError("Hi!");
+
+            if (_boardWidth >= 7 && _boardLength >= 7)
+            {
+                DestroyBoard();
+                
+                float[,] heightMap = new float[_boardWidth, _boardLength];
+                heightMap[1, 2] = 2*_unitTileHeight;
+                heightMap[2, 1] = 2*_unitTileHeight;
+                heightMap[2, 4] = 2*_unitTileHeight;
+                heightMap[3, 1] = 2*_unitTileHeight;
+                heightMap[4, 1] = 2*_unitTileHeight;
+                heightMap[4, 4] = 2*_unitTileHeight;
+                heightMap[5, 2] = 2*_unitTileHeight;
+                
+                SetUpGameBoard(heightMap);
+
+                return;
+            }
         }
         
         Reset();
@@ -142,11 +164,16 @@ public class BoardLogic : MonoBehaviour
 
     public void SetUpGameBoard()
     {
-        int[,] heightMap = GetHeightArrangement();
+        float[,] heightMap = GetHeightArrangement();
 
         InstantiateBoard(heightMap);
     }
 
+    public void SetUpGameBoard(float[,] heightMap)
+    {
+        InstantiateBoard(heightMap);
+    }
+    
     public void DestroyBoard()
     {
         // TODO: pooling
@@ -172,7 +199,7 @@ public class BoardLogic : MonoBehaviour
         _arrangement = (HeightArrangement)(((int)_arrangement + 1) % enumLength);
     }
 
-    private int[,] GetHeightArrangement()
+    private float[,] GetHeightArrangement()
     {
         switch (_arrangement)
         {
@@ -202,9 +229,9 @@ public class BoardLogic : MonoBehaviour
     /// Returns a randomly generated height map for the tiles.
     /// </summary>
     /// <returns>Height values for each tile</returns>
-    private int[,] GenerateFlatHeightMap()
+    private float[,] GenerateFlatHeightMap()
     {
-        int[,] heightMap = new int[_boardLength, _boardWidth];
+        float[,] heightMap = new float[_boardLength, _boardWidth];
 
         for (int z = 0; z < _boardLength; z++)
         {
@@ -221,15 +248,15 @@ public class BoardLogic : MonoBehaviour
     /// Returns a randomly generated height map for the tiles.
     /// </summary>
     /// <returns>Height values for each tile</returns>
-    private int[,] GenerateRandomHeightMap()
+    private float[,] GenerateRandomHeightMap()
     {
-        int[,] heightMap = new int[_boardLength, _boardWidth];
+        float[,] heightMap = new float[_boardLength, _boardWidth];
 
         for (int z = 0; z < _boardLength; z++)
         {
             for (int x = 0; x < _boardWidth; x++)
             {
-                heightMap[z, x] = (int)(Random.value * _tileMaxHeight);
+                heightMap[z, x] = Random.value * _boardMaxHeight;
             }
         }
 
@@ -241,9 +268,9 @@ public class BoardLogic : MonoBehaviour
     /// </summary>
     /// <param name="path">Path to height map file</param>
     /// <returns>Height map as described by file</returns>
-    private int[,] GetHeightMapFromFile(string path)
+    private float[,] GetHeightMapFromFile(string path)
     {
-        int[,] heightMap = new int[_boardLength, _boardWidth];
+        float[,] heightMap = new float[_boardLength, _boardWidth];
 
         // TODO: get file from given path
 
@@ -252,7 +279,7 @@ public class BoardLogic : MonoBehaviour
 
     #endregion
 
-    private void InstantiateBoard(int[,] heightMap)
+    private void InstantiateBoard(float[,] heightMap)
     {
         int length = _boardLength;
         int width = _boardWidth;
@@ -285,8 +312,11 @@ public class BoardLogic : MonoBehaviour
                     {
                         _tiles[z, x] = Instantiate(_tile, new Vector3(x, 0, z),
                             Quaternion.identity, transform);
+
+                        float height = heightMap[z - heightMapOffset, x - heightMapOffset];
+                        float steppedHeight = height - (height % _unitTileHeight);
                         _tiles[z, x].GetComponent<TileBehaviour>()
-                            .SetHeight(0.2f + heightMap[z - heightMapOffset, x - heightMapOffset]);
+                            .SetHeight(0.2f + steppedHeight);
                     }
                 }
                 else

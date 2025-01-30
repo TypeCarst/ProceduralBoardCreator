@@ -141,6 +141,6 @@ Material:
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
     - _TopLowHeight: {r: 0, g: 0, b: 0, a: 1}
     - _TopMidHeight: {r: 0.06611049, g: 0.3018868, b: 0.06123176, a: 1}
-    - _TopTopHeight: {r: 0.754717, g: 0.754717, b: 0.754717, a: 1}
+    - _TopTopHeight: {r: 0.9245283, g: 0.9245283, b: 0.9245283, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

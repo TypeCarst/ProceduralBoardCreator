@@ -149,12 +149,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9b765df38c18cd42bfcf039213849a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _generationSeed: 
+  _generationSeed: 42VCOWA8X1
   _type: 0
   _arrangement: 1
-  _boardWidth: 14
-  _boardLength: 10
-  _tileMaxHeight: 6
+  _boardWidth: 20
+  _boardLength: 20
+  _boardMaxHeight: 3
+  _unitTileHeight: 0.1
   _useBorder: 1
   _tile: {fileID: 1004586079308408, guid: f5027a95802e4494b8cddcd9c6a6407c, type: 3}
   _borderTile: {fileID: 1866266809070880, guid: 928646b81b25b1545a005d12f39b7ef3,
@@ -430,7 +431,7 @@ Transform:
   m_GameObject: {fileID: 1485934475}
   serializedVersion: 2
   m_LocalRotation: {x: 0.42089108, y: 0.08184513, z: -0.038164888, w: 0.9026049}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalPosition: {x: 0, y: 8.67, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

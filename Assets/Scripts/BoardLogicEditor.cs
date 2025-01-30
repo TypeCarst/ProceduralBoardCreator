@@ -15,8 +15,8 @@ namespace DefaultNamespace
         private SerializedProperty _boardWidth;
         private SerializedProperty _boardLength;
 
-        private SerializedProperty _tileSideLength;
-        private SerializedProperty _tileMaxHeight;
+        private SerializedProperty _unitTileHeight;
+        private SerializedProperty _boardMaxHeight;
 
         private SerializedProperty _useBorder;
 
@@ -31,7 +31,8 @@ namespace DefaultNamespace
 
         private int _currentBoardWidth;
         private int _currentBoardLength;
-        private int _currentTileMaxHeight;
+        private float _currentBoardMaxHeight;
+        private float _currentUnitTileHeight;
         private bool _currentUseBorder;
 
         #endregion Private fields
@@ -44,7 +45,8 @@ namespace DefaultNamespace
             _arrangement = serializedObject.FindProperty("_arrangement");
             _boardWidth = serializedObject.FindProperty("_boardWidth");
             _boardLength = serializedObject.FindProperty("_boardLength");
-            _tileMaxHeight = serializedObject.FindProperty("_tileMaxHeight");
+            _boardMaxHeight = serializedObject.FindProperty("_boardMaxHeight");
+            _unitTileHeight = serializedObject.FindProperty("_unitTileHeight");
             _useBorder = serializedObject.FindProperty("_useBorder");
             _tile = serializedObject.FindProperty("_tile");
             _borderTile = serializedObject.FindProperty("_borderTile");
@@ -63,13 +65,18 @@ namespace DefaultNamespace
 
             _currentBoardLength = _boardLength.intValue;
             var lengthContent = new GUIContent("Board length", "Well, the length...");
-            _currentBoardWidth = EditorGUILayout.IntSlider(lengthContent, _currentBoardLength, 1, 20);
+            _currentBoardLength = EditorGUILayout.IntSlider(lengthContent, _currentBoardLength, 1, 20);
             _boardLength.intValue = _currentBoardLength;
 
-            _currentTileMaxHeight = _tileMaxHeight.intValue;
-            var maxHeightContent = new GUIContent("Tile max height", "The maximum height of a tile");
-            _currentBoardWidth = EditorGUILayout.IntSlider(maxHeightContent, _currentTileMaxHeight, 1, 10);
-            _tileMaxHeight.intValue = _currentTileMaxHeight;
+            _currentBoardMaxHeight = _boardMaxHeight.floatValue;
+            var maxHeightContent = new GUIContent("Maximal board height", "The maximum height of the board");
+            _currentBoardMaxHeight = EditorGUILayout.Slider(maxHeightContent, _currentBoardMaxHeight, 1, 10);
+            _boardMaxHeight.floatValue = _currentBoardMaxHeight;
+            
+            _currentUnitTileHeight = _unitTileHeight.floatValue;
+            var unitTileHeightContent = new GUIContent("Unit Tile height", "The unit height of every tile");
+            _currentUnitTileHeight = EditorGUILayout.Slider(unitTileHeightContent, _currentUnitTileHeight, 0.1f, 10);
+            _unitTileHeight.floatValue = _currentUnitTileHeight;
 
             _currentUseBorder = _useBorder.boolValue;
             _currentUseBorder =
@@ -85,12 +92,14 @@ namespace DefaultNamespace
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Generation", EditorStyles.boldLabel);
 
+            EditorGUI.BeginDisabledGroup(!Application.isPlaying);
+
             _currentSeed = _generationSeed.stringValue;
             _currentSeed = EditorGUILayout.TextField(
                 new GUIContent("Seed", "An empty field will create a random seed."),
                 _currentSeed);
             _generationSeed.stringValue = _currentSeed;
-            
+
             if (GUILayout.Button("Regenerate with seed"))
             {
                 BoardLogic boardLogic = (BoardLogic)target;
@@ -102,7 +111,9 @@ namespace DefaultNamespace
                 BoardLogic boardLogic = (BoardLogic)target;
                 boardLogic.Regenerate("");
             }
-            
+
+            EditorGUI.EndDisabledGroup();
+
             serializedObject.ApplyModifiedProperties();
         }
     }
