@@ -1,7 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using DefaultNamespace;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
+using SpecialLayout = DefaultNamespace.PredefinedLayouts.Layout;
 
 public class BoardLogic : MonoBehaviour
 {
@@ -47,7 +50,7 @@ public class BoardLogic : MonoBehaviour
 
     [SerializeField]
     private float _unitTileHeight;
-    
+
     [SerializeField]
     private bool _useBorder = true;
 
@@ -59,8 +62,16 @@ public class BoardLogic : MonoBehaviour
 
     #endregion Serialized fields
 
+    #region Private fields
+
+    private readonly List<GameObject> _tilesPool = new();
+    private readonly List<GameObject> _borderTilesPool = new();
+    private int _numberTilesInUse;
+    private int _numberBorderTilesInUse;
     private GameObject[,] _tiles;
     private System.Random _random;
+
+    #endregion Private fields
 
     // Use this for initialization
     void Start()
@@ -75,7 +86,7 @@ public class BoardLogic : MonoBehaviour
         {
             SetNextHeightArrangement();
 
-            DestroyBoard();
+            RemoveCurrentBoard();
             SetUpGameBoard();
         }
 
@@ -88,7 +99,7 @@ public class BoardLogic : MonoBehaviour
 
                 // TODO: keep current layout and add a row and a column
 
-                DestroyBoard();
+                RemoveCurrentBoard();
                 SetUpGameBoard();
             }
         }
@@ -102,7 +113,7 @@ public class BoardLogic : MonoBehaviour
 
                 // TODO: keep current layout and remove a row and a column
 
-                DestroyBoard();
+                RemoveCurrentBoard();
                 SetUpGameBoard();
             }
         }
@@ -110,9 +121,15 @@ public class BoardLogic : MonoBehaviour
         // create new board
         if (Input.GetKeyDown(KeyCode.R))
         {
-            DestroyBoard();
+            RemoveCurrentBoard();
             SetUpGameBoard();
         }
+    }
+
+    public void OnDestroy()
+    {
+        _tilesPool.Clear();
+        _borderTilesPool.Clear();
     }
 
     public void Regenerate(string baseSeed)
@@ -126,57 +143,60 @@ public class BoardLogic : MonoBehaviour
         {
             _generationSeed = baseSeed;
         }
-        
+
         int seed = _generationSeed.GetHashCode();
         Random.InitState(seed);
-        
-        if (_generationSeed.Contains("hello"))
+
+        if (TryGetPredefinedLayout(_generationSeed))
+        {
+            return;
+        }
+
+        Reset();
+    }
+
+    private bool TryGetPredefinedLayout(string seed)
+    {
+        if (seed.Contains("hello"))
         {
             Debug.LogError("Hi!");
 
             if (_boardWidth >= 7 && _boardLength >= 7)
             {
-                DestroyBoard();
-                
-                float[,] heightMap = new float[_boardWidth, _boardLength];
-                heightMap[1, 2] = 2*_unitTileHeight;
-                heightMap[2, 1] = 2*_unitTileHeight;
-                heightMap[2, 4] = 2*_unitTileHeight;
-                heightMap[3, 1] = 2*_unitTileHeight;
-                heightMap[4, 1] = 2*_unitTileHeight;
-                heightMap[4, 4] = 2*_unitTileHeight;
-                heightMap[5, 2] = 2*_unitTileHeight;
-                
+                RemoveCurrentBoard();
+
+                float[,] heightMap = PredefinedLayouts.GetArrangement(SpecialLayout.Smile, _boardWidth,
+                    _boardLength, _unitTileHeight);
+
                 SetUpGameBoard(heightMap);
 
-                return;
+                return true;
             }
         }
-        
-        Reset();
+
+        return false;
     }
 
     public void Reset()
     {
-        DestroyBoard();
+        RemoveCurrentBoard();
         SetUpGameBoard();
     }
 
-    public void SetUpGameBoard()
+    private void SetUpGameBoard()
     {
         float[,] heightMap = GetHeightArrangement();
 
         InstantiateBoard(heightMap);
     }
 
-    public void SetUpGameBoard(float[,] heightMap)
+    private void SetUpGameBoard(float[,] heightMap)
     {
         InstantiateBoard(heightMap);
     }
-    
-    public void DestroyBoard()
+
+    private void RemoveCurrentBoard()
     {
-        // TODO: pooling
         int w = _tiles.GetLength(1);
         int l = _tiles.GetLength(0);
 
@@ -184,9 +204,11 @@ public class BoardLogic : MonoBehaviour
         {
             for (int x = 0; x < w; x++)
             {
-                Destroy(_tiles[z, x]);
+                _tiles[z, x].SetActive(false);
             }
         }
+
+        _numberTilesInUse = 0;
     }
 
     #region INSTANTIATION
@@ -195,7 +217,7 @@ public class BoardLogic : MonoBehaviour
 
     private void SetNextHeightArrangement()
     {
-        int enumLength = System.Enum.GetNames(typeof(HeightArrangement)).Length;
+        int enumLength = Enum.GetNames(typeof(HeightArrangement)).Length;
         _arrangement = (HeightArrangement)(((int)_arrangement + 1) % enumLength);
     }
 
@@ -295,7 +317,6 @@ public class BoardLogic : MonoBehaviour
         // initialize tiles
         _tiles = new GameObject[length, width];
 
-        // TODO: use object pooling!
         for (int z = 0; z < length; z++)
         {
             for (int x = 0; x < width; x++)
@@ -304,24 +325,44 @@ public class BoardLogic : MonoBehaviour
                 {
                     if (_useBorder && (z == 0 || z == length - 1 || x == 0 || x == width - 1))
                     {
-                        _tiles[z, x] = Instantiate(_borderTile,
-                            new Vector3(x, 0, z), Quaternion.identity,
-                            transform);
+                        var borderTile = _numberBorderTilesInUse < _borderTilesPool.Count
+                            ? _borderTilesPool[_numberBorderTilesInUse]
+                            : Instantiate(_borderTile, new Vector3(x, 0, z), Quaternion.identity, transform);
+
+                        if (_numberBorderTilesInUse >= _borderTilesPool.Count)
+                        {
+                            _borderTilesPool.Add(borderTile);
+                        }
+
+                        borderTile.SetActive(true);
+                        borderTile.transform.position = new Vector3(x, 0, z);
+                        _tiles[z, x] = borderTile;
+                        _numberBorderTilesInUse++;
                     }
                     else
                     {
-                        _tiles[z, x] = Instantiate(_tile, new Vector3(x, 0, z),
-                            Quaternion.identity, transform);
+                        var tile = _numberTilesInUse < _tilesPool.Count
+                            ? _tilesPool[_numberTilesInUse]
+                            : Instantiate(_tile, new Vector3(x, 0, z), Quaternion.identity, transform);
+
+                        if (_numberTilesInUse >= _tilesPool.Count)
+                        {
+                            _tilesPool.Add(tile);
+                        }
+
+                        tile.SetActive(true);
+                        tile.transform.position = new Vector3(x, 0, z);
+                        _tiles[z, x] = tile;
+                        _numberTilesInUse++;
 
                         float height = heightMap[z - heightMapOffset, x - heightMapOffset];
                         float steppedHeight = height - (height % _unitTileHeight);
-                        _tiles[z, x].GetComponent<TileBehaviour>()
-                            .SetHeight(0.2f + steppedHeight);
+                        tile.GetComponent<TileBehaviour>().SetHeight(0.2f + steppedHeight);
                     }
                 }
                 else
                 {
-                    Debug.LogError("Too bad, not implemented yet!");
+                    Debug.Log("Too bad, not implemented yet!");
                 }
             }
         }
@@ -341,11 +382,11 @@ public class BoardLogic : MonoBehaviour
 
     #region Helpers
 
-    public static string RandomString(int length)
+    private static string RandomString(int length)
     {
         System.Random random = new System.Random();
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        return new string(Enumerable.Repeat(chars, length)
+        const string CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        return new string(Enumerable.Repeat(CHARS, length)
             .Select(s => s[random.Next(s.Length)]).ToArray());
     }
 

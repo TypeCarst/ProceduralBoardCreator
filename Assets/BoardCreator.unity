@@ -152,8 +152,8 @@ MonoBehaviour:
   _generationSeed: 42VCOWA8X1
   _type: 0
   _arrangement: 1
-  _boardWidth: 20
-  _boardLength: 20
+  _boardWidth: 5
+  _boardLength: 5
   _boardMaxHeight: 3
   _unitTileHeight: 0.1
   _useBorder: 1
